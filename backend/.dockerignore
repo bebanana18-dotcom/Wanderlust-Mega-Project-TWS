@@ -1,0 +1,45 @@
+# Dependencies — reinstalled fresh inside Docker
+node_modules
+
+# Local env files — .env.docker is copied explicitly in Dockerfile
+.env
+.env.*
+!.env.docker
+
+# Test related — not needed in image
+coverage
+.nyc_output
+tests
+__tests__
+*.test.js
+*.spec.js
+
+# Dev tooling configs — useless inside a container
+.eslintrc*
+.prettierrc*
+.prettierignore
+babel.config*
+jest.config*
+
+# Git
+.git
+.gitignore
+
+# Docker files themselves
+Dockerfile*
+.dockerignore
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS garbage
+.DS_Store
+Thumbs.db
+
+# Editor configs
+.vscode
+.idea
+*.swp
+*.swo
