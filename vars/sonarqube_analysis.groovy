@@ -7,8 +7,8 @@
 // FIX: Added -Dsonar.sourceEncoding=UTF-8 — prevents encoding warnings/failures
 //      on non-ASCII codebases.
 
-def call(String SonarTool, String ProjectKey, String ProjectName) {
-    if (!SonarTool || !ProjectKey || !ProjectName) {
+def call(String SonarTool, String SonarServer, String ProjectKey, String ProjectName) {
+    if (!SonarTool  || !SonarServer || !ProjectKey || !ProjectName) {
         error("sonarqube_analysis: SonarTool, ProjectKey, and ProjectName must not be empty.")
     }
 
@@ -16,7 +16,7 @@ def call(String SonarTool, String ProjectKey, String ProjectName) {
 
     echo "🔍 Running SonarQube analysis for project: ${ProjectName} (key: ${ProjectKey})"
 
-    withSonarQubeEnv("${SonarTool}") {
+    withSonarQubeEnv("${SonarServer}") {
         sh """
             ${scannerHome}/bin/sonar-scanner \
                 -Dsonar.projectKey=${ProjectKey} \
