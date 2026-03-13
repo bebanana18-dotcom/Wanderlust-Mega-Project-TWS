@@ -14,7 +14,7 @@ def call(String kubeConfigCredId, String... manifestFiles) {
         manifestFiles.each { file ->
             echo "📄 Applying: ${file}"
             def applyStatus = sh(
-                script: "kubectl apply -f ${file} --kubeconfig=\${KUBECONFIG}",
+                script: "kubectl apply -f ${file} --kubeconfig=\$KUBECONFIG",
                 returnStatus: true
             )
             if (applyStatus != 0) {
@@ -25,7 +25,7 @@ def call(String kubeConfigCredId, String... manifestFiles) {
 
     echo "✅ All manifests applied successfully."
 }
-```
+/*
 
 ---
 
@@ -39,4 +39,4 @@ Jenkins > Manage Jenkins > Credentials
   → File: your ~/.kube/config
   → ID: KUBECONFIG-CRED
 ```
-
+*/
