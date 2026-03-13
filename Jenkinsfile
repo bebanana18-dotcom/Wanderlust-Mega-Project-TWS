@@ -196,6 +196,17 @@ pipeline {
             }
         }
 
+        // ─────────────────────────────────────────────
+        // STAGE 13: Deploy to Kubernetes
+        // ─────────────────────────────────────────────
+        stage("K8s: Apply Manifests") {
+            steps {
+                script {
+                    k8s_apply("K8S-CRED", "kubernetes/backend.yaml", "kubernetes/frontend.yaml")
+                }
+            }
+        }
+
     }
 
     // ─────────────────────────────────────────────────
