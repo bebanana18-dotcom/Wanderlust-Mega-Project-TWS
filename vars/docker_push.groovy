@@ -1,47 +1,31 @@
 // vars/docker_push.groovy
-// FIX: docker push was OUTSIDE the withCredentials block in original —
-//      credentials were already disposed before push ran. Guaranteed failure.
-// FIX: Both docker login AND docker push are now inside withCredentials block.
-// FIX: Uses credential username variable instead of the passed-in DockerHubUser
-//      for the actual push — so credential and image owner always match.
-// FIX: Added input validation.
-// FIX: Added explicit returnStatus check for both login and push with clear errors.
-// FIX: docker logout added after push — security best practice, clears session.
+// STEP 2: Migrated from DockerHub to Google Artifact Registry
+// REMOVED: withCredentials block — no username/password needed
+// REMOVED: docker login / docker logout — gcloud credential helper handles auth transparently
+// REMOVED: DockerHubUser parameter — GAR uses full registry path instead
+// ADDED:   Registry parameter — full GAR registry path passed in
+// NOTE:    Auth prereq — gcloud auth configure-docker us-central1-docker.pkg.dev
+//          must be run once on the Jenkins VM as the jenkins user
 
-def call(String ProjectName, String ImageTag, String DockerHubUser, String credentialsId = 'DOCKER-CRED') {
-    if (!ProjectName || !ImageTag || !DockerHubUser) {
-        error("docker_push: ProjectName, ImageTag, and DockerHubUser must not be empty.")
+def call(String ProjectName, String ImageTag, String Registry) {
+    if (!ProjectName || !ImageTag || !Registry) {
+        error("docker_push: ProjectName, ImageTag, and Registry must not be empty.")
     }
 
-    def fullImageName = "${DockerHubUser}/${ProjectName}:${ImageTag}"
+    def fullImageName = "${Registry}/${ProjectName}:${ImageTag}"
+    echo "Pushing Docker image: ${fullImageName}"
 
-    echo "📤 Pushing Docker image: ${fullImageName}"
-
-    withCredentials([usernamePassword(
-        credentialsId: "${credentialsId}",
-        passwordVariable: 'DOCKER_PASS',
-        usernameVariable: 'DOCKER_USER'
-    )]) {
-        def loginStatus = sh(
-            script: "echo \${DOCKER_PASS} | docker login -u \${DOCKER_USER} --password-stdin",
-            returnStatus: true
-        )
-
-        if (loginStatus != 0) {
-            error("docker_push: Docker login FAILED. Check credentials ID '${credentialsId}' in Jenkins.")
-        }
-
+    try {
         def pushStatus = sh(
             script: "docker push ${fullImageName}",
             returnStatus: true
         )
-
         if (pushStatus != 0) {
-            error("docker_push: Push FAILED for image ${fullImageName}. Check DockerHub access and tag.")
+            error("docker_push: Push FAILED for image ${fullImageName}. Check GAR permissions and registry path.")
         }
-
-        sh "docker logout"
+    } catch (Exception e) {
+        error("docker_push: Unexpected error pushing ${fullImageName}: ${e.message}")
     }
 
-    echo "✅ Docker image pushed successfully: ${fullImageName}"
+    echo "Docker image pushed successfully: ${fullImageName}"
 }
