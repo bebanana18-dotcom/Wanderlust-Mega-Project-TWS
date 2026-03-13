@@ -48,7 +48,7 @@ pipeline {
                     // (including later push) work on non-public or strict agents.
                     // code_checkout() uses plain `git` step with no creds — 
                     // safe for public clone, but be aware push uses separate creds block.
-                    code_checkout("https://github.com/bebanana18-dotcom/Wanderlust-Mega-Project-GCP.git", "main")
+                    code_checkout("https://github.com/bebanana18-dotcom/Wanderlust-Mega-Project-GCP.git", "main" , "GITHUB-CRED")
                 }
             }
         }
