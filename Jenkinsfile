@@ -121,8 +121,8 @@ pipeline {
                     //         sh "docker push ${dockerhubuser}/${Project}:${ImageTag}"
                     //     }
                     // }
-                    docker_push("wanderlust-backend-beta",  "${params.BACKEND_DOCKER_TAG}",  "himanshumaurya1920" , "DOCKER-CRED")
-                    docker_push("wanderlust-frontend-beta", "${params.FRONTEND_DOCKER_TAG}", "himanshumaurya1920" , "DOCKER-CRED")
+                    docker_push("wanderlust-backend-beta",  "latest",  "himanshumaurya1920" , "DOCKER-CRED")
+                    docker_push("wanderlust-frontend-beta", "latest",  "himanshumaurya1920" , "DOCKER-CRED")
                 }
             }
         }
@@ -156,6 +156,7 @@ pipeline {
         // ─────────────────────────────────────────────
         // Stage 10 "Verify Docker Image Tags" (we'll verify SHAs instead)
 
+        
         // ─────────────────────────────────────────────
         // STAGE 11: Update Kubernetes Manifests
         // ─────────────────────────────────────────────
@@ -168,8 +169,8 @@ pipeline {
                     // New: sed -i "s|...|...|g"                       (safe, quoted)
                     dir('kubernetes') {
                         sh """
-                            sed -i "s|wanderlust-backend-beta:.*|wanderlust-backend-beta:${params.BACKEND_DOCKER_TAG}|g" 05backend.yaml
-                            sed -i "s|wanderlust-frontend-beta:.*|wanderlust-frontend-beta:${params.FRONTEND_DOCKER_TAG}|g" 06frontend.yaml
+                            sed -i "s|image:.*wanderlust-backend-beta.*|image: ${env.BACKEND_SHA}|g"  05backend.yaml
+                            sed -i "s|image:.*wanderlust-frontend-beta.*|image: ${env.FRONTEND_SHA}|g" 06frontend.yaml
                         """
                     }
                 }
@@ -213,8 +214,8 @@ pipeline {
     post {
         success {
             echo "✅ Pipeline completed successfully!"
-            echo "   Frontend Tag : ${params.FRONTEND_DOCKER_TAG}"
-            echo "   Backend Tag  : ${params.BACKEND_DOCKER_TAG}"
+            echo "   Frontend SHA : ${env.FRONTEND_SHA}"
+            echo "   Backend  SHA : ${env.BACKEND_SHA}"
         }
         failure {
             echo "❌ Pipeline FAILED. Check logs above."
