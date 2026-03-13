@@ -15,6 +15,9 @@ def call(String credentialsId, String repoUrl, String branch = "main", List<Stri
             echo "Checking repository status:"
             git status
 
+            echo "Fixing detached HEAD:"
+            git checkout -B ${branch}
+            
             echo "Configuring git identity:"
             git config user.email "jenkins@ci.local"
             git config user.name  "Jenkins CI"
