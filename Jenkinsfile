@@ -5,6 +5,11 @@ pipeline {
 
     environment {
         SONAR_HOME = tool "SONAR-TOOLS"
+
+        GCP_PROJECT  = "piyush-gcp"
+        GAR_LOCATION = "us-central1"
+        GAR_REPO     = "wanderlust"
+        GAR_REGISTRY = "${GAR_LOCATION}-docker.pkg.dev"
     }
 
     // ─── NO PARAMETERS BLOCK ───────────────────────────────────────────────
@@ -80,7 +85,8 @@ pipeline {
                 script {
                     dir('backend') {
                         env.BACKEND_SHA = docker_build(
-                            "wanderlust-backend-beta", "latest", "himanshumaurya1920"
+                            "wanderlust-backend-beta", "latest", 
+                            "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}"
                         )
                         if (!env.BACKEND_SHA) {
                             error("Failed to extract SHA for backend image. Build may have failed silently.")
@@ -90,12 +96,14 @@ pipeline {
         
                     dir('frontend') {
                         env.FRONTEND_SHA = docker_build(
-                            "wanderlust-frontend-beta", "latest", "himanshumaurya1920"
+                            "wanderlust-frontend-beta", "latest",
+                            "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}"
                         )
                         if (!env.FRONTEND_SHA) {
                             error("Failed to extract SHA for frontend image. Build may have failed silently.")
                         }
                         echo "Frontend SHA: ${env.FRONTEND_SHA}"
+                        //RESULT : us-central1-docker.pkg.dev/piyush-gcp/wanderlust/wanderlust-backend-beta@sha256:abc123...
                     }
                 }
             }
@@ -121,8 +129,8 @@ pipeline {
                     //         sh "docker push ${dockerhubuser}/${Project}:${ImageTag}"
                     //     }
                     // }
-                    docker_push("wanderlust-backend-beta",  "latest",  "himanshumaurya1920" , "DOCKER-CRED")
-                    docker_push("wanderlust-frontend-beta", "latest",  "himanshumaurya1920" , "DOCKER-CRED")
+                    docker_push("wanderlust-backend-beta",  "latest",  "himanshumaurya1920" , "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
+                    docker_push("wanderlust-frontend-beta", "latest",  "himanshumaurya1920" , "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
                 }
             }
         }
