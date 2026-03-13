@@ -202,7 +202,7 @@ pipeline {
         stage("K8s: Apply Manifests") {
             steps {
                 script {
-                    k8s_apply("K8S-CRED", "kubernetes/backend.yaml", "kubernetes/frontend.yaml")
+                    k8s_apply("K8S-CRED", "kubernetes/05backend.yaml", "kubernetes/06frontend.yaml")
                 }
             }
         }
