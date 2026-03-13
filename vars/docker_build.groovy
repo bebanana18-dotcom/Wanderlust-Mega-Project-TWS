@@ -17,7 +17,11 @@ def call(String ProjectName, String ImageTag, String DockerHubUser, Boolean noCa
     if (!sha) { error("Failed to get SHA for ${fullImageName}") }
     
    
-    echo "Built ${fullImageName} -> ${sha}"
-    return sha
+    // Construct full K8s-ready digest right here
+    // We have everything we need — no post-push re-fetch required
+    def fullDigest = "${DockerHubUser}/${ProjectName}@sha256:${sha}"
+
+    echo "Built ${fullImageName} -> ${fullDigest}"
+    return fullDigest
 
 }
