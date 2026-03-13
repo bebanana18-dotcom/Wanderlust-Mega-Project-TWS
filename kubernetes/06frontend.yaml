@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: himanshumaurya1920/wanderlust-frontend-beta:1.0.0
+          image: himanshumaurya1920/wanderlust-frontend-beta@sha256:95e0bffcbc2e6cfbd510a09767345ccd65419863e976fdbb6e8f7f17c5a10e37
           ports:
             - containerPort: 80
 ---
