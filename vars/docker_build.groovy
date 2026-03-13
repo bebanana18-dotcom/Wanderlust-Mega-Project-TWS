@@ -1,9 +1,3 @@
-// vars/docker_build.groovy
-// FIX: Added input validation — fails fast if any argument is empty.
-// FIX: Added --no-cache flag as optional param to avoid stale layer bugs.
-// FIX: Added explicit error handling with clear message if docker build fails.
-// FIX: Echoes the full image name being built for easier log tracing.
-
 def call(String ProjectName, String ImageTag, String DockerHubUser, Boolean noCache = false) {
     if (!ProjectName || !ImageTag || !DockerHubUser) {
         error("docker_build: ProjectName, ImageTag, and DockerHubUser must not be empty.")
@@ -14,14 +8,16 @@ def call(String ProjectName, String ImageTag, String DockerHubUser, Boolean noCa
 
     echo "🔨 Building Docker image: ${fullImageName}"
 
-    def buildStatus = sh(
-        script: "docker build ${noCacheFlag} -t ${fullImageName} .",
-        returnStatus: true
-    )
+    sh "docker build ${noCacheFlag} --iidfile imageid.txt -t ${fullImageName} ."
+    def sha = sh(
+        script: "cat imageid.txt | sed 's/sha256://'",
+        returnStdout: true
+    ).trim()
+    
+    if (!sha) { error("Failed to get SHA for ${fullImageName}") }
+    
+   
+    echo "Built ${fullImageName} -> ${sha}"
+    return sha
 
-    if (buildStatus != 0) {
-        error("docker_build: Build FAILED for image ${fullImageName}. Check Dockerfile and build context.")
-    }
-
-    echo "✅ Docker image built successfully: ${fullImageName}"
 }
