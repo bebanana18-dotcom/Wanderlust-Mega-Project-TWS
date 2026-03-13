@@ -171,8 +171,8 @@ pipeline {
                     // New: sed -i "s|...|...|g"                       (safe, quoted)
                     dir('kubernetes') {
                         sh """
-                            sed -i "s|wanderlust-backend-beta:.*|wanderlust-backend-beta:${params.BACKEND_DOCKER_TAG}|g" backend.yaml
-                            sed -i "s|wanderlust-frontend-beta:.*|wanderlust-frontend-beta:${params.FRONTEND_DOCKER_TAG}|g" frontend.yaml
+                            sed -i "s|wanderlust-backend-beta:.*|wanderlust-backend-beta:${params.BACKEND_DOCKER_TAG}|g" 05backend.yaml
+                            sed -i "s|wanderlust-frontend-beta:.*|wanderlust-frontend-beta:${params.FRONTEND_DOCKER_TAG}|g" 06frontend.yaml
                         """
                     }
                 }
