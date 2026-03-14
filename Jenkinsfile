@@ -71,26 +71,12 @@ pipeline {
             steps {
                 script {
                     dir('backend') {
-                        env.BACKEND_SHA = docker_build(
-                            "wanderlust-backend-beta", "latest", 
-                            "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}"
-                        )
-                        if (!env.BACKEND_SHA) {
-                            error("Failed to extract SHA for backend image. Build may have failed silently.")
-                        }
-                        echo "Backend SHA: ${env.BACKEND_SHA}"
+                        docker_build("wanderlust-backend-beta", "latest",
+                            "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
                     }
-        
                     dir('frontend') {
-                        env.FRONTEND_SHA = docker_build(
-                            "wanderlust-frontend-beta", "latest",
-                            "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}"
-                        )
-                        if (!env.FRONTEND_SHA) {
-                            error("Failed to extract SHA for frontend image. Build may have failed silently.")
-                        }
-                        echo "Frontend SHA: ${env.FRONTEND_SHA}"
-                        //RESULT : us-central1-docker.pkg.dev/piyush-gcp/wanderlust/wanderlust-backend-beta@sha256:abc123...
+                        docker_build("wanderlust-frontend-beta", "latest",
+                            "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
                     }
                 }
             }
@@ -102,9 +88,16 @@ pipeline {
         stage("Docker: Push to GOOGLE ARTIFACT REGISTRY") {
             steps {
                 script {
-            
-                    docker_push("wanderlust-backend-beta",  "latest",   "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
-                    docker_push("wanderlust-frontend-beta", "latest",   "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
+                    // ✅ NOW capture digest AFTER push — this is the real GAR manifest digest
+                    env.BACKEND_SHA = docker_push("wanderlust-backend-beta", "latest",
+                        "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
+        
+                    env.FRONTEND_SHA = docker_push("wanderlust-frontend-beta", "latest",
+                        "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
+        
+                    if (!env.BACKEND_SHA || !env.FRONTEND_SHA) {
+                        error("Failed to retrieve GAR digest after push. Refusing to deploy phantom images.")
+                    }
                 }
             }
         }
