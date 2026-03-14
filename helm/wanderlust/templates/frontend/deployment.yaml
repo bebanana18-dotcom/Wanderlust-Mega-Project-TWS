@@ -1,6 +1,3 @@
-
-Copy
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,6 +18,6 @@ spec:
       containers:
         - name: {{ .Values.frontend.name }}
           # digest injected by pipeline: repository@sha256:abc123
-          image: {{ .Values.frontend.image.repository }}@{{ .Values.frontend.image.digest }}
+          image: "{{ .Values.frontend.image.repository }}@{{ .Values.frontend.image.digest }}"
           ports:
             - containerPort: {{ .Values.frontend.port.container }}

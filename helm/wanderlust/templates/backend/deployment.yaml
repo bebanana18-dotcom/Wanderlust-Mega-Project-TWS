@@ -18,6 +18,6 @@ spec:
       containers:
         - name: {{ .Values.backend.name }}
           # digest injected by pipeline: repository@sha256:abc123
-          image: {{ .Values.backend.image.repository }}@{{ .Values.backend.image.digest }}
+          image: "{{ .Values.backend.image.repository }}@{{ .Values.backend.image.digest }}"
           ports:
             - containerPort: {{ .Values.backend.port.container }}
