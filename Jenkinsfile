@@ -119,8 +119,8 @@ pipeline {
             steps {
                 script {
                     sh """
-                        sed -i "s|digest:.*backend.*|digest: ${env.BACKEND_SHA}|g"  values.yaml
-                        sed -i "s|digest:.*frontend.*|digest: ${env.FRONTEND_SHA}|g" values.yaml
+                        yq e '.backend.image.digest = "sha256:${env.BACKEND_SHA}"' -i values.yaml
+                        yq e '.frontend.image.digest = "sha256:${env.FRONTEND_SHA}"' -i values.yaml
                     """
                 }
             }
