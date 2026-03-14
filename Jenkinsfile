@@ -164,7 +164,7 @@ pipeline {
                                 --namespace wanderlust \
                                 --create-namespace \
                                 --atomic \
-                                --timeout 9m \
+                                --timeout 3m \
                                 --kubeconfig \$KUBECONFIG
                         """
                     }
