@@ -60,6 +60,7 @@ pipeline {
             steps {
                 script {
                     code_checkout("https://github.com/bebanana18-dotcom/Wanderlust-Mega-Project-GCP.git", "main" , "GITHUB-CRED")
+                    env.IMAGE_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT[0..6]}"
                 }
             }
         }
@@ -95,11 +96,11 @@ pipeline {
             steps {
                 script {
                     dir('backend') {
-                        docker_build("wanderlust-backend-beta", "latest",
+                        docker_build("wanderlust-backend-beta", env.IMAGE_TAG,
                             "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
                     }
                     dir('frontend') {
-                        docker_build("wanderlust-frontend-beta", "latest",
+                        docker_build("wanderlust-frontend-beta", env.IMAGE_TAG,
                             "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
                     }
                 }
