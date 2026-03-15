@@ -46,5 +46,5 @@ def call(String ProjectName, String ImageTag, String Registry) {
     }
 
     echo "✅ GAR digest for ${fullImageName}: sha256:${digest}"
-    return digest
+    return "sha256:${digest.replaceAll('^sha256:', '')}"  // normalize — always exactly one prefix
 }
