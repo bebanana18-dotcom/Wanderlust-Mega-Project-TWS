@@ -124,8 +124,15 @@ pipeline {
                         "FRONTEND_SHA=${env.FRONTEND_SHA}"
                     ]) {
                         sh """
+                            # ✅ Fail loudly if values.yaml is missing — never let yq create a blank one
+                            test -f values.yaml || { echo "❌ values.yaml not found at repo root!"; exit 1; }
+                    
                             yq e '.backend.image.digest  = strenv(BACKEND_SHA)'  -i values.yaml
                             yq e '.frontend.image.digest = strenv(FRONTEND_SHA)' -i values.yaml
+                    
+                            # ✅ Confirm the values were actually written
+                            echo "--- values.yaml digest section after update ---"
+                            yq e '.backend.image.digest, .frontend.image.digest' values.yaml
                         """
                     }
                 }
