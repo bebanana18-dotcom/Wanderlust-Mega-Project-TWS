@@ -201,6 +201,7 @@ pipeline {
         }
         always {
             echo "Pipeline finished with status: ${currentBuild.currentResult}"
+            cleanWs()        // ✅ runs on EVERY build — success, failure, or abort
         }
     }
 
