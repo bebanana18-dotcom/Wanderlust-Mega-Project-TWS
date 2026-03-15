@@ -3,6 +3,30 @@
 pipeline {
     agent any
 
+    // Jenkins pipeline safety and observability settings.
+    //
+    // timeout(30 MINUTES)
+    //   Prevents builds from hanging indefinitely if a stage gets stuck.
+    //
+    // buildDiscarder(logRotator(numToKeepStr: '2'))
+    //   Keeps only the last 2 builds to control disk usage on the Jenkins server. (ideally 6-10)
+    //
+    // disableConcurrentBuilds()
+    //   Ensures only one pipeline execution runs at a time.
+    //   This prevents concurrent builds from pushing to the same branch
+    //   simultaneously, reducing the risk of Git race conditions.
+    //
+    // timestamps()
+    //   Adds timestamps to every log line to make debugging and pipeline
+    //   performance analysis easier.
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()       // ✅ prevents two builds running simultaneously
+                                        //    ties directly into Problem 3 race condition!
+        timestamps()                    // ✅ adds timestamp to every log line
+    }
+
     environment {
         SONAR_HOME = tool "SONAR-TOOLS"
 
