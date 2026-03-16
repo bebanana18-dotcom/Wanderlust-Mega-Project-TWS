@@ -26,6 +26,28 @@ backend:
     service: 80
   service:
     type: NodePort
+    # ── Resource Limits ────────────────────────────────────────
+  resources:
+    requests:
+      cpu: "250m"       # guaranteed slice — scheduler uses this
+      memory: "256Mi"
+    limits:
+      cpu: "500m"       # hard cap — won't steal from neighbors
+      memory: "512Mi"
+  # ── Probes ─────────────────────────────────────────────────
+  probes:
+    readiness:
+      path: /
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 3
+  # ── HPA ────────────────────────────────────────────────────
+  hpa:
+    minReplicas: 1
+    maxReplicas: 3
+    cpuTargetPercent: 60     # scale up when avg CPU > 60%
+    memTargetPercent: 70     # scale up when avg memory > 70%
+    
 # -----------------------------------------------------------------------------
 # Frontend
 # -----------------------------------------------------------------------------
@@ -41,6 +63,29 @@ frontend:
     service: 80
   service:
     type: NodePort
+  # ── Resource Limits ────────────────────────────────────────
+  # Frontend is mostly static serving — lighter than backend
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
+  # ── Probes ─────────────────────────────────────────────────
+  probes:
+    readiness:
+      path: /
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 3
+  # ── HPA ────────────────────────────────────────────────────
+  hpa:
+    minReplicas: 1
+    maxReplicas: 3
+    cpuTargetPercent: 60
+    memTargetPercent: 70
+  
 # -----------------------------------------------------------------------------
 # MongoDB
 # -----------------------------------------------------------------------------
