@@ -28,12 +28,32 @@ pipeline {
     }
 
     environment {
-        SONAR_HOME = tool "SONAR-TOOLS"
+   
+
+        // ── SonarQube ────────────────────────────────────────────
+        SONAR_HOME        = tool "SONAR-TOOLS"
+        SONAR_TOOL        = "SONAR-TOOLS"
+        SONAR_SERVER      = "SONAR-SYSTEM"
+        SONAR_PROJECT_KEY = "wanderlust"
 
         GCP_PROJECT  = "piyush-gcp"
         GAR_LOCATION = "us-central1"
         GAR_REPO     = "wanderlust-repo"
         GAR_REGISTRY = "${GAR_LOCATION}-docker.pkg.dev"
+
+        // ── Image Names ──────────────────────────────────────────
+        BACKEND_IMAGE  = "wanderlust-backend-beta"
+        FRONTEND_IMAGE = "wanderlust-frontend-beta"
+    
+        // ── Git ──────────────────────────────────────────────────
+        GIT_REPO_URL   = "https://github.com/bebanana18-dotcom/Wanderlust-Mega-Project-GCP.git"
+        GIT_BRANCH     = "main"
+        GITHUB_CRED    = "GITHUB-CRED"
+    
+        // ── Kubernetes / Helm ────────────────────────────────────
+        K8S_CRED       = "K8S-CRED"
+        HELM_CHART     = "./helm/wanderlust"
+        K8S_NAMESPACE  = "wanderlust"
     }
 
 
@@ -59,7 +79,7 @@ pipeline {
         stage("Git: Code Checkout") {
             steps {
                 script {
-                    code_checkout("https://github.com/bebanana18-dotcom/Wanderlust-Mega-Project-GCP.git", "main" , "GITHUB-CRED")
+                    code_checkout(env.GIT_REPO_URL , env.GIT_BRANCH , env.GITHUB_CRED )
                     env.IMAGE_TAG = "${env.BUILD_NUMBER}-${env.GIT_COMMIT[0..6]}"
                 }
             }
@@ -71,7 +91,13 @@ pipeline {
         stage("SonarQube: Code Analysis") {
             steps {
                 script {
-                    sonarqube_analysis("SONAR-TOOLS", "SONAR-SYSTEM", "wanderlust", "wanderlust")
+                    // sonarqube_analysis("SONAR-TOOLS", "SONAR-SYSTEM", "wanderlust", "wanderlust")
+                    sonarqube_analysis(
+                        env.SONAR_TOOL,
+                        env.SONAR_SERVER,
+                        env.SONAR_PROJECT_KEY,
+                        env.SONAR_PROJECT_KEY   // project name = project key, same value
+                    )
                 }
             }
         }
@@ -85,6 +111,7 @@ pipeline {
                     // NOTE: abortPipeline is false — pipeline won't fail on bad quality gate.
                     // Change to abortPipeline: true when you're ready to enforce quality.
                     sonarqube_code_quality(true)
+                    
                 }
             }
         }
@@ -96,11 +123,11 @@ pipeline {
             steps {
                 script {
                     dir('backend') {
-                        docker_build("wanderlust-backend-beta", env.IMAGE_TAG,
+                        docker_build(env.BACKEND_IMAGE, env.IMAGE_TAG,
                             "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
                     }
                     dir('frontend') {
-                        docker_build("wanderlust-frontend-beta", env.IMAGE_TAG,
+                        docker_build(env.FRONTEND_IMAGE, env.IMAGE_TAG,
                             "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
                     }
                 }
@@ -114,10 +141,10 @@ pipeline {
             steps {
                 script {
                     // ✅ NOW capture digest AFTER push — this is the real GAR manifest digest
-                    env.BACKEND_SHA = docker_push("wanderlust-backend-beta", "latest",
+                    env.BACKEND_SHA = docker_push(env.BACKEND_IMAGE, env.IMAGE_TAG,
                         "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
         
-                    env.FRONTEND_SHA = docker_push("wanderlust-frontend-beta", "latest",
+                    env.FRONTEND_SHA = docker_push(env.FRONTEND_IMAGE, env.IMAGE_TAG,
                         "${env.GAR_REGISTRY}/${env.GCP_PROJECT}/${env.GAR_REPO}")
         
                     if (!env.BACKEND_SHA || !env.FRONTEND_SHA) {
@@ -172,10 +199,11 @@ pipeline {
         stage("Git: Commit and Push Manifests") {
             steps {
                 script {
+                   
                     git_commit_and_push(
-                        "GITHUB-CRED",
-                        "https://github.com/bebanana18-dotcom/Wanderlust-Mega-Project-GCP.git",
-                        "main",
+                        env.GITHUB_CRED,
+                        env.GIT_REPO_URL,
+                        env.GIT_BRANCH,
                         ["values.yaml"],
                         "CI: Update image tags [skip ci]"
                     )
@@ -196,8 +224,8 @@ pipeline {
                 script {
                     withCredentials([file(credentialsId: 'K8S-CRED', variable: 'KUBECONFIG')]) {
                         sh """
-                            helm upgrade --install wanderlust ./helm/wanderlust \
-                                --namespace wanderlust \
+                            helm upgrade --install wanderlust ${env.HELM_CHART} \
+                                --namespace ${env.K8S_NAMESPACE} \
                                 --create-namespace \
                                 --atomic \
                                 --timeout 5m \
