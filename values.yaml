@@ -29,10 +29,10 @@ backend:
     # ── Resource Limits ────────────────────────────────────────
   resources:
     requests:
-      cpu: "250m"       # guaranteed slice — scheduler uses this
+      cpu: "250m" # guaranteed slice — scheduler uses this
       memory: "256Mi"
     limits:
-      cpu: "500m"       # hard cap — won't steal from neighbors
+      cpu: "500m" # hard cap — won't steal from neighbors
       memory: "512Mi"
   # ── Probes ─────────────────────────────────────────────────
   probes:
@@ -45,9 +45,8 @@ backend:
   hpa:
     minReplicas: 1
     maxReplicas: 3
-    cpuTargetPercent: 60     # scale up when avg CPU > 60%
-    memTargetPercent: 70     # scale up when avg memory > 70%
-    
+    cpuTargetPercent: 60 # scale up when avg CPU > 60%
+    memTargetPercent: 70 # scale up when avg memory > 70%
 # -----------------------------------------------------------------------------
 # Frontend
 # -----------------------------------------------------------------------------
@@ -85,7 +84,6 @@ frontend:
     maxReplicas: 3
     cpuTargetPercent: 60
     memTargetPercent: 70
-  
 # -----------------------------------------------------------------------------
 # MongoDB
 # -----------------------------------------------------------------------------
