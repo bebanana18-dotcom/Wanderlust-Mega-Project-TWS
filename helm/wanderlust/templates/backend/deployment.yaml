@@ -10,6 +10,12 @@ spec:
   selector:
     matchLabels:
       app: {{ .Values.backend.name }}
+  # ── Rolling Update Strategy ───────────────────────────────
+  strategy:
+    type: RollingUpdate  # Result: zero-downtime deploys. Always.
+    rollingUpdate:
+      maxUnavailable: 0  # maxUnavailable: 0  → never kill old pod before new one is ready
+      maxSurge: 1 # maxSurge: 1  → allow 1 extra pod during rollout
   template:
     metadata:
       labels:
@@ -21,3 +27,19 @@ spec:
           image: "{{ .Values.backend.image.repository }}@{{ .Values.backend.image.digest }}"
           ports:
             - containerPort: {{ .Values.backend.port.container }}
+           # ── Resources ──────────────────────────────────────
+          resources:
+            requests:
+              cpu: {{ .Values.backend.resources.requests.cpu }}
+              memory: {{ .Values.backend.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.backend.resources.limits.cpu }}
+              memory: {{ .Values.backend.resources.limits.memory }}
+
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.backend.probes.readiness.path }}
+              port: {{ .Values.backend.port.container }}
+            initialDelaySeconds: {{ .Values.backend.probes.readiness.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.probes.readiness.periodSeconds }}
+            failureThreshold: {{ .Values.backend.probes.readiness.failureThreshold }}
