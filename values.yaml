@@ -122,4 +122,4 @@ redis:
 ingress:
   name: wanderlust-ingress
   class: gce
-  staticIpName: gke-nginx-global-ip
+  staticIpName: gke-ingress-extip1
