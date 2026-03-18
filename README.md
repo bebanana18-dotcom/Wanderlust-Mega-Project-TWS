@@ -195,21 +195,25 @@ We create a dedicated SA with only what GKE nodes actually need.
 # =============================================================
 # Step 4 — Create dedicated GKE node service account
 # =============================================================
-gcloud iam service-accounts create gke-node-sa \\
-  --display-name "GKE Node SA" \\
+gcloud iam service-accounts create gke-node-sa \
+  --display-name "GKE Node SA" \
   --project piyush-gcp
 
 # Grant only what nodes actually need
-gcloud projects add-iam-policy-binding piyush-gcp \\
-  --member "<serviceAccount:gke-node-sa@piyush-gcp.iam.gserviceaccount.com>" \\
+gcloud projects add-iam-policy-binding piyush-gcp \
+  --member="serviceAccount:gke-node-sa@piyush-gcp.iam.gserviceaccount.com" \
+  --role="roles/container.defaultNodeServiceAccount"
+
+gcloud projects add-iam-policy-binding piyush-gcp \
+  --member "<serviceAccount:gke-node-sa@piyush-gcp.iam.gserviceaccount.com>" \
   --role roles/logging.logWriter
 
-gcloud projects add-iam-policy-binding piyush-gcp \\
-  --member "<serviceAccount:gke-node-sa@piyush-gcp.iam.gserviceaccount.com>" \\
+gcloud projects add-iam-policy-binding piyush-gcp \
+  --member "<serviceAccount:gke-node-sa@piyush-gcp.iam.gserviceaccount.com>" \
   --role roles/monitoring.metricWriter
 
-gcloud projects add-iam-policy-binding piyush-gcp \\
-  --member "<serviceAccount:gke-node-sa@piyush-gcp.iam.gserviceaccount.com>" \\
+gcloud projects add-iam-policy-binding piyush-gcp \
+  --member "<serviceAccount:gke-node-sa@piyush-gcp.iam.gserviceaccount.com>" \
   --role roles/artifactregistry.reader
 ```
 
@@ -228,8 +232,8 @@ gcloud projects add-iam-policy-binding piyush-gcp \\
 Create a dedicated service account for Jenkins master VM.
 
 ```bash
-gcloud iam service-accounts create jenkins-master-sa \\
-  --project piyush-gcp \\
+gcloud iam service-accounts create jenkins-master-sa \
+  --project piyush-gcp \
   --display-name "Jenkins Master Service Account"
 ```
 
@@ -249,8 +253,8 @@ we grant full GKE permissions.
 Full access (recommended for bastion / admin / Jenkins)
 
 ```bash
-gcloud projects add-iam-policy-binding piyush-gcp \\
-  --member=serviceAccount:jenkins-master-sa@piyush-gcp.iam.gserviceaccount.com \\
+gcloud projects add-iam-policy-binding piyush-gcp \
+  --member=serviceAccount:jenkins-master-sa@piyush-gcp.iam.gserviceaccount.com \
   --role=roles/container.admin
   
   
@@ -289,16 +293,16 @@ require additional permissions.
 Allow Jenkins to use service accounts
 
 ```bash
-gcloud projects add-iam-policy-binding piyush-gcp \\
-  --member=serviceAccount:jenkins-master-sa@piyush-gcp.iam.gserviceaccount.com \\
+gcloud projects add-iam-policy-binding piyush-gcp \
+  --member=serviceAccount:jenkins-master-sa@piyush-gcp.iam.gserviceaccount.com \
   --role=roles/iam.serviceAccountUser
 ```
 
 Allow read access to Compute resources
 
 ```bash
-gcloud projects add-iam-policy-binding piyush-gcp \\
-  --member=serviceAccount:jenkins-master-sa@piyush-gcp.iam.gserviceaccount.com \\
+gcloud projects add-iam-policy-binding piyush-gcp \
+  --member=serviceAccount:jenkins-master-sa@piyush-gcp.iam.gserviceaccount.com \
   --role=roles/compute.viewer
 ```
 
@@ -346,7 +350,7 @@ gcloud compute instances create jenkins-master-vm \\
 
 ```bash
 #this is important
-  --service-account=jenkins-master-sa@piyush-gcp.iam.gserviceaccount.com \\
+  --service-account=jenkins-master-sa@piyush-gcp.iam.gserviceaccount.com \
 ```
 
 ---
